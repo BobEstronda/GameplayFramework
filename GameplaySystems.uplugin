@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "GameplaySystems",
+	"Description": "Inventory,Equipments,ItemManager, Abilities, etc...",
+	"Category": "Other",
+	"CreatedBy": "Alessandro Cristoffer",
+	"CreatedByURL": "https://www.linkedin.com/in/alessandro-alves-20ba561b2/",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "GameplaySystems",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
