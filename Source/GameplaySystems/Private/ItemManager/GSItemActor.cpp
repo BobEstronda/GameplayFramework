@@ -36,7 +36,7 @@ void AGSItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AGSItemActor,ActorItemDefinition)
 }
 
-void AGSItemActor::SetItem(const FGSItem& InItem)
+void AGSItemActor::SetItem(UGSItemDefinition* InItem)
 {
 	Item = InItem;
 	

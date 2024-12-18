@@ -16,24 +16,25 @@ class GAMEPLAYSYSTEMS_API UGSItemManagerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(VisibleAnywhere,Replicated,Category = "GameplayFramework|Items")
+	TArray<AGSItemActor*> ItemsSpawnedInWorld;
+
+	UPROPERTY(EditDefaultsOnly,Category = "GameplayFramework|Items")
+	uint8 MaxItemsSpawnedInWorld = 4;
+	
 public:	
 	UGSItemManagerComponent();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(Server,Reliable,BlueprintCallable,Category = "ItemManager")
-	virtual void SpawnItemInWorld(const FGSItem& InItem,UGSActorItemDefinition* ActorItemDefinition,const EItemState InItemState);
+	virtual void SpawnItemInWorld(UGSItemDefinition* InItem,UGSActorItemDefinition* ActorItemDefinition,const EItemState InItemState);
 
 	UFUNCTION(Client,Reliable,BlueprintCallable,Category = "ItemManager")
-	virtual void FailedToSpawnItemInWorld(const FGSItem& InItem,UGSActorItemDefinition* ActorItemDefinition,const EItemState InItemState);
+	virtual void FailedToSpawnItemInWorld(UGSItemDefinition* InItem,UGSActorItemDefinition* ActorItemDefinition,const EItemState InItemState);
 
 protected:
-
-private:
-	UPROPERTY(EditDefaultsOnly,Replicated,Category = "GameplayFramework|Items")
-	TArray<AGSItemActor*> ItemsSpawnedInWorld;
-
-	UPROPERTY(EditDefaultsOnly,Category = "GameplayFramework|Items")
-	uint8 MaxItemsSpawnedInWorld = 4;
+	
 	
 };

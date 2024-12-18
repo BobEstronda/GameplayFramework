@@ -3,7 +3,6 @@
 
 #include "Inventory/GSInventoryComponent.h"
 
-#include "Inventory/GSItemCustomCondition.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -20,9 +19,15 @@ void UGSInventoryComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME_CONDITION(UGSInventoryComponent, Inventory,COND_OwnerOnly)
-	DOREPLIFETIME_CONDITION(UGSInventoryComponent, Slots,COND_OwnerOnly)
+	DOREPLIFETIME_CONDITION(UGSInventoryComponent, MaxSlotsInInventory,COND_OwnerOnly)
 }
 
+void UGSInventoryComponent::AddInitialItems_Implementation(const TArray<FGSItem>& InitialItems)
+{
+	
+}
+
+/*
 void UGSInventoryComponent::AddInitialItems(const TArray<FGSItem>& InitialItems)
 {
 
@@ -32,25 +37,13 @@ void UGSInventoryComponent::AddInitialItems(const TArray<FGSItem>& InitialItems)
 		uint8 Remaining;
 		PickUpItem(InitialITem,Remaining);
 	}
-}
+}*/
 
-bool UGSInventoryComponent::PickUpItem(const FGSItem& NewItem, uint8& Remaining,const TSubclassOf<UGSItemCustomCondition> CustomCondition)
+void UGSInventoryComponent::PickUpItem(const FGSItem& NewItem, uint8& Remaining)
 {
 	if (!GetOwner()->HasAuthority())
 	{
-		ServerPickUpItem(NewItem,CustomCondition);
-	}
-
-	if (CustomCondition)
-	{
-		UGSItemCustomCondition* NewCondition = NewObject<UGSItemCustomCondition>(this,CustomCondition);
-		const bool bCanPickupItem = NewCondition->CanPickupItem(this,NewItem);
-		if (bCanPickupItem)
-		{
-			Inventory.Add(NewItem);
-		}
-		NewCondition->ConditionalBeginDestroy();
-		return bCanPickupItem;
+		ServerPickUpItem(NewItem);
 	}
 	
 	uint8 RemainingStack = NewItem.Quantity;
@@ -67,21 +60,20 @@ bool UGSInventoryComponent::PickUpItem(const FGSItem& NewItem, uint8& Remaining,
 
 			if (RemainingStack == 0)
 			{
-				Remaining = 0;
-				return true;
+				Remaining = RemainingStack;
+				return;
 			}
 		}
 	}
 	
-	while (RemainingStack > 0 && Inventory.Num() < Slots)
+	while (RemainingStack > 0 && Inventory.Num() < MaxSlotsInInventory)
 	{
 		const uint8 ValueToAdd = FMath::Min(NewItem.ItemDefinition->GetMaxStack(), RemainingStack);
-		const uint8 IndexForNewItem = Inventory.Emplace(NewItem.ItemDefinition, ValueToAdd);
+		Inventory.Emplace(NewItem.ItemDefinition, ValueToAdd);
 		RemainingStack -= ValueToAdd;
 	}
 	
 	Remaining = RemainingStack;
-	return RemainingStack == 0;
 }
 
 void UGSInventoryComponent::ConsumeItem(const uint8 ItemID, const uint8 Quantity)
@@ -114,10 +106,10 @@ void UGSInventoryComponent::ConsumeItem(const uint8 ItemID, const uint8 Quantity
 	}
 }
 
-void UGSInventoryComponent::ServerPickUpItem_Implementation(const FGSItem& NewItem, const TSubclassOf<UGSItemCustomCondition> CustomCondition)
+void UGSInventoryComponent::ServerPickUpItem_Implementation(const FGSItem& NewItem)
 {
 	uint8 Remaining;
-	PickUpItem(NewItem,Remaining,CustomCondition);
+	PickUpItem(NewItem,Remaining);
 }
 
 void UGSInventoryComponent::ServerConsumeItem_Implementation(const uint8 ItemID, const uint8 Quantity)

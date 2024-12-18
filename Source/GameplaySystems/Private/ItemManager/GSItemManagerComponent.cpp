@@ -19,12 +19,12 @@ void UGSItemManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(UGSItemManagerComponent, ItemsSpawnedInWorld)
 }
 
-void UGSItemManagerComponent::FailedToSpawnItemInWorld_Implementation(const FGSItem& InItem,UGSActorItemDefinition* ActorItemDefinition, const EItemState InItemState)
+void UGSItemManagerComponent::FailedToSpawnItemInWorld_Implementation(UGSItemDefinition* InItem,UGSActorItemDefinition* ActorItemDefinition, const EItemState InItemState)
 {
 	//....
 }
 
-void UGSItemManagerComponent::SpawnItemInWorld_Implementation(const FGSItem& InItem,UGSActorItemDefinition* ActorItemDefinition,const EItemState InItemState)
+void UGSItemManagerComponent::SpawnItemInWorld_Implementation(UGSItemDefinition* InItem,UGSActorItemDefinition* ActorItemDefinition,const EItemState InItemState)
 {
 	if (!ActorItemDefinition) return;
 	

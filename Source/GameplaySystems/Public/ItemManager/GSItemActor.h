@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Inventory/FGSItem.h"
 #include "ItemManager/EItemState.h"
 #include "ItemManager/GSActorItemDefinition.h"
 #include "GSItemActor.generated.h"
 
+class UGSItemDefinition;
 class UStaticMeshComponent;
 class UBoxComponent;
 class UGSActorItemDefinition;
@@ -22,7 +22,7 @@ public:
 	AGSItemActor();
 
 	UFUNCTION(BlueprintCallable,BlueprintPure)
-	FORCEINLINE FGSItem& GetItem() {return Item; }
+	FORCEINLINE UGSItemDefinition* GetItem() const {return Item; }
 
 	UFUNCTION(BlueprintCallable,BlueprintPure)
 	FORCEINLINE EItemState GetItemState() const {return ItemState; }
@@ -38,7 +38,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	virtual void SetItem(const FGSItem& InItem);
+	virtual void SetItem(UGSItemDefinition* InItem);
 	
 	virtual void SetItemState(const EItemState InItemState);
 
@@ -86,7 +86,7 @@ private:
 	UBoxComponent* BoxCollision;
 
 	UPROPERTY(VisibleAnywhere,ReplicatedUsing = OnRep_Item, Category = "GameplayFramework|Components")
-	FGSItem Item;
+	UGSItemDefinition* Item;
 
 	UPROPERTY(VisibleAnywhere,ReplicatedUsing = OnRep_ItemDefinition, Category = "GameplayFramework|ActorItemDefinition")
 	UGSActorItemDefinition* ActorItemDefinition = nullptr;

@@ -7,8 +7,6 @@
 #include "Inventory/FGSItem.h"
 #include "GSInventoryComponent.generated.h"
 
-class UGSItemCustomCondition;
-
 /*
  * Basic Rules
  * 1: Each item must have its own unique ItemIndex. Reason: Comparison in the struct is based on its ItemIndex.
@@ -22,32 +20,37 @@ class GAMEPLAYSYSTEMS_API UGSInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+private:
+	UPROPERTY(VisibleAnywhere,Replicated,Category = "InventorySystem|Items")
+	TArray<FGSItem> Inventory;
+
+	UPROPERTY(EditDefaultsOnly,Replicated,Category = "InventorySystem|Slots")
+	uint8 MaxSlotsInInventory = 10;
+
 public:	
 	UGSInventoryComponent();
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	UFUNCTION(BlueprintCallable,BlueprintPure)
+	const TArray<FGSItem>& GetInventory() const {return Inventory; }
+	
+	UFUNCTION(BlueprintCallable,BlueprintPure)
+	const uint8 GetMaxSlotsInInventory() const {return MaxSlotsInInventory; }
+
+	UFUNCTION(Server,Reliable, BlueprintCallable, Category = "Inventory|Server")
 	void AddInitialItems(const TArray<FGSItem>& InitialItems);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory|Client")
-	virtual bool PickUpItem(const FGSItem& NewItem, uint8& Remaining,const TSubclassOf<UGSItemCustomCondition> CustomCondition = nullptr);
+	virtual void PickUpItem(const FGSItem& NewItem, uint8& Remaining);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory|Client")
 	virtual void ConsumeItem(const uint8 ItemID, const uint8 Quantity);
 
 protected:
+	UFUNCTION(Server,Reliable, Category = "Inventory|Server")
+	virtual void ServerPickUpItem(const FGSItem& NewItem);
 
-	UFUNCTION(Server,Reliable)
-	virtual void ServerPickUpItem(const FGSItem& NewItem,TSubclassOf<UGSItemCustomCondition> CustomCondition = nullptr);
-
-	UFUNCTION(Server,Reliable)
+	UFUNCTION(Server,Reliable, Category = "Inventory|Server")
 	virtual void ServerConsumeItem(const uint8 ItemID, const uint8 Quantity);
-	
-private:
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Replicated,Category = "GameplayFramework|Items",meta=(AllowPrivateAccess = "true"))
-	TArray<FGSItem> Inventory;
-
-	UPROPERTY(VisibleAnywhere,BlueprintReadOnly,Replicated,Category = "GameplayFramework|Slots",meta=(AllowPrivateAccess = "true"))
-	uint8 Slots = 10;
 };
