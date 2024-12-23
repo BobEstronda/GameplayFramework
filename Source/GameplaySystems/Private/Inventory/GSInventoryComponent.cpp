@@ -27,18 +27,6 @@ void UGSInventoryComponent::AddInitialItems_Implementation(const TArray<FGSItem>
 	
 }
 
-/*
-void UGSInventoryComponent::AddInitialItems(const TArray<FGSItem>& InitialItems)
-{
-
-	for (const FGSItem& InitialITem : InitialItems)
-	{
-		
-		uint8 Remaining;
-		PickUpItem(InitialITem,Remaining);
-	}
-}*/
-
 void UGSInventoryComponent::PickUpItem(const FGSItem& NewItem, uint8& Remaining)
 {
 	if (!GetOwner()->HasAuthority())
@@ -57,7 +45,7 @@ void UGSInventoryComponent::PickUpItem(const FGSItem& NewItem, uint8& Remaining)
 
 			ItemData.Quantity += ValueToAdd;
 			RemainingStack -= ValueToAdd;
-
+			
 			if (RemainingStack == 0)
 			{
 				Remaining = RemainingStack;
@@ -69,8 +57,13 @@ void UGSInventoryComponent::PickUpItem(const FGSItem& NewItem, uint8& Remaining)
 	while (RemainingStack > 0 && Inventory.Num() < MaxSlotsInInventory)
 	{
 		const uint8 ValueToAdd = FMath::Min(NewItem.ItemDefinition->GetMaxStack(), RemainingStack);
-		Inventory.Emplace(NewItem.ItemDefinition, ValueToAdd);
+		const int32 IndexForNewItem = Inventory.Emplace(NewItem.ItemDefinition, ValueToAdd);
 		RemainingStack -= ValueToAdd;
+		
+		if (GetOwner()->HasAuthority())
+		{
+			ClientNewItemAdded(Inventory[IndexForNewItem],RemainingStack == 0);
+		}
 	}
 	
 	Remaining = RemainingStack;
@@ -104,6 +97,11 @@ void UGSInventoryComponent::ConsumeItem(const uint8 ItemID, const uint8 Quantity
 			if (RemainingQuantity == 0) return;
 		}
 	}
+}
+
+void UGSInventoryComponent::ClientNewItemAdded_Implementation(const FGSItem& NewItem, bool Success)
+{
+	NewItemAdded.Broadcast(NewItem,Success);
 }
 
 void UGSInventoryComponent::ServerPickUpItem_Implementation(const FGSItem& NewItem)

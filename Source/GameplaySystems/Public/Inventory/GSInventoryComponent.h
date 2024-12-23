@@ -7,6 +7,8 @@
 #include "Inventory/FGSItem.h"
 #include "GSInventoryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnNewItemAdded,const FGSItem&, NewItem, bool, Success);
+
 /*
  * Basic Rules
  * 1: Each item must have its own unique ItemIndex. Reason: Comparison in the struct is based on its ItemIndex.
@@ -19,8 +21,7 @@ UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAMEPLAYSYSTEMS_API UGSInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
-private:
+	
 	UPROPERTY(VisibleAnywhere,Replicated,Category = "InventorySystem|Items")
 	TArray<FGSItem> Inventory;
 
@@ -47,10 +48,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory|Client")
 	virtual void ConsumeItem(const uint8 ItemID, const uint8 Quantity);
 
+	UPROPERTY(BlueprintAssignable, BlueprintReadOnly)
+	FOnNewItemAdded NewItemAdded;
+
 protected:
 	UFUNCTION(Server,Reliable, Category = "Inventory|Server")
 	virtual void ServerPickUpItem(const FGSItem& NewItem);
 
 	UFUNCTION(Server,Reliable, Category = "Inventory|Server")
 	virtual void ServerConsumeItem(const uint8 ItemID, const uint8 Quantity);
+
+	UFUNCTION(Client,Reliable)
+	virtual void ClientNewItemAdded(const FGSItem& NewItem,bool Success);
 };
