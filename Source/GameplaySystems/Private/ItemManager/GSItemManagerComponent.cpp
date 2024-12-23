@@ -17,6 +17,17 @@ void UGSItemManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UGSItemManagerComponent, ItemsSpawnedInWorld)
+	DOREPLIFETIME(UGSItemManagerComponent, EquippedItem)
+}
+
+void UGSItemManagerComponent::SetEquippedItem(AGSItemActor* InItem)
+{
+	if (EquippedItem)
+	{
+		EquippedItem->SetItemState(EItemState::Unequipped);
+	}
+	EquippedItem = InItem;
+	EquippedItem->SetItemState(EItemState::Equipped);
 }
 
 void UGSItemManagerComponent::FailedToSpawnItemInWorld_Implementation(UGSItemDefinition* InItem,UGSActorItemDefinition* ActorItemDefinition, const EItemState InItemState)
@@ -38,6 +49,14 @@ void UGSItemManagerComponent::SpawnItemInWorld_Implementation(UGSItemDefinition*
 	ItemInWorld->SetOwner(GetOwner());
 	ItemInWorld->SetItem(InItem);
 	ItemInWorld->SetActorItemDefinition(ActorItemDefinition);
+
+	ItemsSpawnedInWorld.Add(ItemInWorld);
+
+	if (InItemState == EItemState::Equipped)
+	{
+		SetEquippedItem(ItemInWorld);
+		return;
+	}
 	ItemInWorld->SetItemState(InItemState);
 }
 
